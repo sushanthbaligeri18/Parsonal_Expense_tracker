@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Welcome to CarShare</h1>
+        <p>Find rides, save money, and meet new people</p>
+        
+        {% if not user.is_authenticated %}
+            <div class="hero-buttons">
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started</a>
+                <a href="{% url 'search_rides' %}" class="btn btn-secondary btn-lg">Browse Rides</a>
+            </div>
+        {% else %}
+            <div class="hero-buttons">
+                <a href="{% url 'search_rides' %}" class="btn btn-primary btn-lg">Find a Ride</a>
+                {% if user.profile.role == 'driver' or user.profile.role == 'both' %}
+                    <a href="{% url 'add_ride' %}" class="btn btn-secondary btn-lg">Post a Ride</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <section class="stats-section">
+        <h2>Our Community</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ rides_count }}</h3>
+                <p>Active Rides</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ drivers_count }}</h3>
+                <p>Drivers</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ passengers_count }}</h3>
+                <p>Users</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <h2>Why Choose CarShare?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>Easy Location Search</h3>
+                <p>Find rides based on your from and to locations</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Quick Ride Details</h3>
+                <p>See full ride information without map overlays</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">₹</div>
+                <h3>Save Money</h3>
+                <p>Share rides and split costs with other travelers</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure Bookings</h3>
+                <p>Safe booking system with driver verification</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏰</div>
+                <h3>Flexible Scheduling</h3>
+                <p>Choose rides that fit your schedule</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Contact Drivers</h3>
+                <p>Direct phone contact with drivers for coordination</p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

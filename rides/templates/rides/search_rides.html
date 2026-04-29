@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Rides - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="search-container">
+        <h1>Find Rides</h1>
+        
+        <!-- Search Form -->
+        <form method="GET" action="{% url 'search_rides' %}" class="search-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="from_location">From Location</label>
+                    <input type="text" id="from_location" name="from_location" 
+                           placeholder="Enter starting location"
+                           value="{{ from_location }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="to_location">To Location</label>
+                    <input type="text" id="to_location" name="to_location" 
+                           placeholder="Enter destination"
+                           value="{{ to_location }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" value="{{ date }}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+        
+        <!-- Results Grid -->
+        <div class="search-results">
+            <div class="results-header">
+                {% if search_performed %}
+                    <h2>Found {{ results_count }} ride{{ results_count|pluralize }}</h2>
+                    <p class="search-info">Search criteria: {{ search_info }}</p>
+                {% else %}
+                    <h2>Available Rides</h2>
+                {% endif %}
+            </div>
+            
+            <!-- Rides List -->
+            {% if rides %}
+            <div class="rides-grid">
+                {% for ride in rides %}
+                <div class="ride-card">
+                    <div class="ride-header">
+                        <h3>{{ ride.from_location }} → {{ ride.to_location }}</h3>
+                        <span class="badge badge-{{ ride.status }}">{{ ride.get_status_display }}</span>
+                    </div>
+                    
+                    <div class="ride-body">
+                        <p class="ride-time">📅 {{ ride.departure_datetime|date:"M d, Y H:i" }}</p>
+                        
+                        <div class="ride-details">
+                            <div class="detail">
+                                <span class="icon">💺</span>
+                                <span>{{ ride.remaining_seats }} seats available</span>
+                            </div>
+                            <div class="detail">
+                                <span class="icon">💵</span>
+                                <span>₹{{ ride.price_per_seat }} per seat</span>
+                            </div>
+                            <div class="detail">
+                                <span class="icon">🚗</span>
+                                <span>{{ ride.driver.get_full_name|default:ride.driver.username }}</span>
+                            </div>
+                            <div class="detail">
+                                <span class="icon">📞</span>
+                                <span>{{ ride.phone_number }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ride-footer">
+                        <a href="{% url 'ride_detail' ride.id %}" class="btn btn-primary">View Ride</a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'book_ride' ride.id %}" class="btn btn-success">Book Now</a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-secondary">Login to Book</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>{% if search_performed %}No rides found matching your criteria.{% else %}No active rides available.{% endif %}</p>
+                <a href="{% url 'search_rides' %}" class="btn btn-primary">Clear Search</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

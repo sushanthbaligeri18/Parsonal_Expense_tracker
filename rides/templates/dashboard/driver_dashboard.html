@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Driver Dashboard - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1>Driver Dashboard</h1>
+        <a href="{% url 'add_ride' %}" class="btn btn-primary">+ Post New Ride</a>
+    </div>
+
+    <!-- Pending Bookings Section -->
+    {% if pending_bookings %}
+    <section class="dashboard-section">
+        <h2>📋 Pending Booking Requests ({{ pending_bookings.count }})</h2>
+        <div class="bookings-list">
+            {% for booking in pending_bookings %}
+            <div class="booking-card">
+                <div class="booking-info">
+                    <p><strong>Passenger:</strong> {{ booking.passenger.get_full_name|default:booking.passenger.username
+                        }}</p>
+                    <p><strong>Ride:</strong> {{ booking.ride.from_location }} → {{ booking.ride.to_location }}</p>
+                    <p><strong>Date/Time:</strong> {{ booking.ride.departure_datetime|date:"M d, Y H:i" }}</p>
+                    <p><strong>Seats Requested:</strong> {{ booking.seats_booked }}</p>
+                    <p><strong>Requested On:</strong> {{ booking.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                <div class="booking-actions">
+                    <a href="{% url 'accept_booking' booking.id %}" class="btn btn-success">Accept</a>
+                    <a href="{% url 'reject_booking' booking.id %}" class="btn btn-danger">Reject</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- My Rides Section -->
+    <section class="dashboard-section">
+        <h2>🚗 My Rides</h2>
+
+        {% if my_rides %}
+        <div class="rides-list">
+            {% for ride in my_rides %}
+            <div class="ride-card">
+                <div class="ride-header">
+                    <h3>{{ ride.from_location }} → {{ ride.to_location }}</h3>
+                    <span class="badge badge-{{ ride.status }}">{{ ride.get_status_display }}</span>
+                </div>
+
+                <div class="ride-details">
+                    <p><strong>📅 Date/Time:</strong> {{ ride.departure_datetime|date:"M d, Y H:i" }}</p>
+                    <p><strong>💺 Seats:</strong> {{ ride.remaining_seats }} available</p>
+                    <p><strong>💵 Price:</strong> ₹{{ ride.price_per_seat }} per seat</p>
+                    <p><strong>📞 Phone:</strong> {{ ride.phone_number }}</p>
+                </div>
+
+                <div class="booking-info">
+                    <p>Bookings: {{ ride.accepted_count }} accepted, {{ ride.total_bookings }} total</p>
+                </div>
+
+                <div class="ride-actions">
+                    <a href="{% url 'ride_detail' ride.id %}" class="btn btn-primary">View</a>
+                    <a href="{% url 'edit_ride' ride.id %}" class="btn btn-secondary">Edit</a>
+                    <a href="{% url 'delete_ride' ride.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">You haven't posted any rides yet. <a href="{% url 'add_ride' %}">Post your first ride</a>
+        </p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

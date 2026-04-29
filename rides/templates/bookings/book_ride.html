@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Ride - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="booking-container">
+        <h1>Book a Ride</h1>
+        
+        <div class="booking-preview">
+            <div class="ride-info">
+                <h2>{{ ride.from_location }} → {{ ride.to_location }}</h2>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>📅 Date & Time:</label>
+                        <p>{{ ride.ride_datetime|date:"M d, Y H:i" }}</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <label>🚗 Driver:</label>
+                        <p>{{ ride.driver.get_full_name|default:ride.driver.username }}</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <label>💺 Available Seats:</label>
+                        <p>{{ ride.remaining_seats }}</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <label>📞 Phone:</label>
+                        <p>{{ ride.phone_number }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" class="booking-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h3>🎫 Booking Details</h3>
+                
+                <div class="form-group">
+                    <label for="seats_booked">Number of Seats *</label>
+                    <select id="seats_booked" name="seats_booked" required>
+                        {% for i in "12345678910" %}
+                            {% if forloop.counter <= ride.remaining_seats %}
+                                <option value="{{ forloop.counter }}" {% if forloop.counter == 1 %}selected{% endif %}>{{ forloop.counter }} seat{{ forloop.counter|pluralize }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <small class="form-hint">Select how many seats you want to book ({{ ride.remaining_seats }} available)</small>
+                </div>
+            </div>
+            
+            <div class="confirmation-message">
+                <h3>✅ Confirm Your Booking</h3>
+                <p>You are about to request seats on this ride. The driver will review your request and notify you of their decision.</p>
+            </div>
+            
+            <div class="booking-summary">
+                <h4>Booking Summary:</h4>
+                <ul>
+                    <li><strong>From:</strong> {{ ride.from_location }}</li>
+                    <li><strong>To:</strong> {{ ride.to_location }}</li>
+                    <li><strong>When:</strong> {{ ride.ride_datetime|date:"M d, Y H:i" }}</li>
+                    <li><strong>Driver:</strong> {{ ride.driver.get_full_name|default:ride.driver.username }}</li>
+                    <li><strong>Contact:</strong> {{ ride.phone_number }}</li>
+                </ul>
+            </div>
+            
+            <p class="terms">
+                By booking, you agree to contact the driver within 24 hours and confirm your participation in the ride.
+            </p>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success btn-lg">Confirm & Request Booking</button>
+                <a href="{% url 'ride_detail' ride.id %}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

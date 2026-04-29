@@ -1,0 +1,14 @@
+"""
+URL configuration for car_sharing project.
+"""
+from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('rides.urls')),
+]
+
+

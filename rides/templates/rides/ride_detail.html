@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ ride.from_location }} → {{ ride.to_location }} - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="ride-detail-container">
+        <div class="ride-detail-header">
+            <h1>{{ ride.from_location }} → {{ ride.to_location }}</h1>
+            <span class="badge badge-{{ ride.status }}">{{ ride.get_status_display }}</span>
+        </div>
+
+        <div class="ride-detail-grid">
+            <!-- Main Ride Info -->
+            <div class="ride-info">
+                <section class="info-card">
+                    <h3>📋 Ride Information</h3>
+                    <div class="info-rows">
+                        <div class="info-row">
+                            <span class="label">Departure:</span>
+                            <span class="value">{{ ride.departure_datetime|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Arrival:</span>
+                            <span class="value">{{ ride.arrival_datetime|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Available Seats:</span>
+                            <span class="value">{{ ride.remaining_seats }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Price per Seat:</span>
+                            <span class="value">₹{{ ride.price_per_seat }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">From:</span>
+                            <span class="value">{{ ride.from_location }} </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">To:</span>
+                            <span class="value">{{ ride.to_location }} </span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="info-card">
+                    <h3>🚗 Driver Information</h3>
+                    <div class="info-rows">
+                        <div class="info-row">
+                            <span class="label">Driver:</span>
+                            <span class="value">{{ ride.driver.get_full_name|default:ride.driver.username }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Phone:</span>
+                            <span class="value">{{ ride.phone_number }}</span>
+                        </div>
+                        {% if ride.car_name %}
+                        <div class="info-row">
+                            <span class="label">Car Name:</span>
+                            <span class="value">{{ ride.car_name }}</span>
+                        </div>
+                        {% endif %}
+                        {% if ride.car_number %}
+                        <div class="info-row">
+                            <span class="label">Car Number:</span>
+                            <span class="value">{{ ride.car_number }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="info-row">
+                            <span class="label">Posted:</span>
+                            <span class="value">{{ ride.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Booking Info for Driver -->
+                {% if is_driver %}
+                <section class="info-card">
+                    <h3>📊 Booking Statistics</h3>
+                    <div class="info-rows">
+                        <div class="info-row">
+                            <span class="label">Total Requests:</span>
+                            <span class="value">{{ ride.bookings.count }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Accepted:</span>
+                            <span class="value badge-accepted">{{ accepted_count }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Pending:</span>
+                            <span class="value badge-pending">{{ pending_count }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Rejected:</span>
+                            <span class="value badge-rejected">{{ rejected_count }}</span>
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- Actions -->
+                {% if is_driver %}
+                <div class="action-buttons">
+                    <a href="{% url 'edit_ride' ride.id %}" class="btn btn-secondary">Edit Ride</a>
+                    <a href="{% url 'delete_ride' ride.id %}" class="btn btn-danger">Delete Ride</a>
+                </div>
+                {% else %}
+                <!-- Passenger Actions -->
+                {% if user.is_authenticated %}
+                <a href="{% url 'book_ride' ride.id %}" class="btn btn-primary btn-lg" style="width: 100%;">Book This Ride</a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg" style="width: 100%;">Login to Book</a>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Bookings Table (for driver) -->
+            {% if is_driver and ride.bookings.count > 0 %}
+            <div class="bookings-info">
+                <section class="info-card">
+                    <h3>📋 Booking Requests</h3>
+                    <div class="table-responsive">
+                        <table class="bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>Passenger</th>
+                                    <th>Seats</th>
+                                    <th>Status</th>
+                                    <th>Booked On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.passenger.get_full_name|default:booking.passenger.username }}</td>
+                                    <td>{{ booking.seats_booked }}</td>
+                                    <td><span class="badge badge-{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                                    <td>{{ booking.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if booking.status == 'pending' %}
+                                        <a href="{% url 'accept_booking' booking.id %}" class="btn-small btn-success">Accept</a>
+                                        <a href="{% url 'reject_booking' booking.id %}" class="btn-small btn-danger">Reject</a>
+                                        {% else %}
+                                        <span class="badge badge-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="back-link">
+            <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

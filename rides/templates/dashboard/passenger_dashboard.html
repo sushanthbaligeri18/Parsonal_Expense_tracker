@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Passenger Dashboard - Car Sharing System{% endblock %}
+
+{% block extra_css %}
+<style>
+.btn-premium-search {
+    background: linear-gradient(135deg, #4F46E5, #EC4899);
+    color: white;
+    font-weight: 700;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-premium-search:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.5);
+    color: white;
+}
+
+.btn-premium-search::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: premium-shine 3s infinite;
+}
+
+@keyframes premium-shine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+}
+
+.quick-links-grid .quick-link {
+    background: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.4s ease;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    border: 2px solid transparent;
+}
+
+.quick-links-grid .quick-link:hover {
+    transform: translateY(-5px);
+    border-color: #EC4899;
+    box-shadow: 0 10px 20px rgba(236, 72, 153, 0.15);
+}
+
+.quick-links-grid .quick-link .icon {
+    font-size: 2.5rem;
+    transition: transform 0.4s ease;
+}
+
+.quick-links-grid .quick-link:hover .icon {
+    transform: scale(1.2) translateY(-5px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1>My Bookings</h1>
+        <a href="{% url 'search_rides' %}" class="btn-premium-search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Find Next Ride
+        </a>
+    </div>
+
+    <!-- My Bookings Section -->
+    <section class="dashboard-section">
+        <h2> My Ride Bookings</h2>
+        
+        {% if my_bookings %}
+        <div class="bookings-list">
+            {% for booking in my_bookings %}
+            <div class="booking-card">
+                <div class="booking-header">
+                    <h3>{{ booking.ride.from_location }} → {{ booking.ride.to_location }}</h3>
+                    <span class="badge badge-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                </div>
+                
+                <div class="booking-details">
+                    <p><strong>📅 Date/Time:</strong> {{ booking.ride.ride_datetime|date:"M d, Y H:i" }}</p>
+                    <p><strong>🚗 Driver:</strong> {{ booking.ride.driver.get_full_name|default:booking.ride.driver.username }}</p>
+                    <p><strong>📞 Phone:</strong> {{ booking.ride.phone_number }}</p>
+                    <p><strong>💺 Available Seats:</strong> {{ booking.ride.available_seats }}</p>
+                </div>
+                
+                <div class="booking-meta">
+                    <p><strong>Booked on:</strong> {{ booking.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                
+                <div class="booking-actions">
+                    <a href="{% url 'booking_status' booking.id %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>You haven't booked any rides yet.</p>
+            <br>
+            <a href="{% url 'search_rides' %}" class="btn-premium-search">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Find rides now
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Quick Links -->
+    <section class="dashboard-section quick-links">
+        <h2>Quick Actions</h2>
+        <div class="quick-links-grid">
+            <a href="{% url 'search_rides' %}" class="quick-link">
+                <span class="icon">🔍</span>
+                <span>Search Rides</span>
+            </a>
+            <a href="{% url 'index' %}" class="quick-link">
+                <span class="icon">🏠</span>
+                <span>Go Home</span>
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

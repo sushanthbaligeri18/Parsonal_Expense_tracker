@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Status - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="booking-status-container">
+        <h1>Booking Details</h1>
+        
+        <div class="status-card status-{{ booking.status }}">
+            <div class="status-badge">
+                <span class="badge badge-{{ booking.status }}">{{ booking.get_status_display|upper }}</span>
+            </div>
+            
+            <div class="booking-details">
+                <section class="detail-section">
+                    <h3>📍 Route</h3>
+                    <p><strong>{{ booking.ride.from_location }} → {{ booking.ride.to_location }}</strong></p>
+                </section>
+                
+                <section class="detail-section">
+                    <h3>📅 Date & Time</h3>
+                    <p>{{ booking.ride.ride_datetime|date:"l, M d, Y H:i" }}</p>
+                </section>
+                
+                <section class="detail-section">
+                    <h3>🚗 Driver Information</h3>
+                    <p><strong>Name:</strong> {{ booking.ride.driver.get_full_name|default:booking.ride.driver.username }}</p>
+                    <p><strong>Phone:</strong> {{ booking.ride.phone_number }}</p>
+                </section>
+                
+                <section class="detail-section">
+                    <h3>💺 Ride Details</h3>
+                    <p><strong>Remaining Seats:</strong> {{ booking.ride.remaining_seats }}</p>
+                </section>
+                
+                <section class="detail-section">
+                    <h3>📋 Booking Status</h3>
+                    <div class="status-info">
+                        {% if booking.status == 'pending' %}
+                            <p class="status-message pending-msg">
+                                ⏳ Your booking request is pending. The driver will respond shortly.
+                            </p>
+                        {% elif booking.status == 'accepted' %}
+                            <p class="status-message accepted-msg">
+                                ✅ Your booking is confirmed! The driver has accepted your request.
+                                <br><strong>Please contact the driver at {{ booking.ride.phone_number }} to confirm details.</strong>
+                            </p>
+                        {% elif booking.status == 'rejected' %}
+                            <p class="status-message rejected-msg">
+                                ❌ Your booking request was rejected by the driver. 
+                                <br>You can search for other rides or try booking another one.
+                            </p>
+                        {% elif booking.status == 'cancelled' %}
+                            <p class="status-message cancelled-msg">
+                                🚫 This booking has been cancelled.
+                            </p>
+                        {% endif %}
+                    </div>
+                </section>
+                
+                <section class="detail-section">
+                    <h3>📅 Booking Timeline</h3>
+                    <p><strong>Requested on:</strong> {{ booking.created_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Last updated:</strong> {{ booking.updated_at|date:"M d, Y H:i" }}</p>
+                </section>
+            </div>
+            
+            <div class="booking-actions">
+                <a href="{% url 'search_rides' %}" class="btn btn-secondary">Search More Rides</a>
+                <a href="{% url 'ride_detail' booking.ride.id %}" class="btn btn-primary">View Ride Details</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

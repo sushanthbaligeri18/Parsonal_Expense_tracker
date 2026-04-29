@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Action - Car Sharing System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <h2>{% if action == 'accept' %}Accept Booking{% else %}Reject Booking{% endif %}</h2>
+            
+            <div class="booking-preview">
+                <h3>{{ booking.ride.from_location }} → {{ booking.ride.to_location }}</h3>
+                <p><strong>Passenger:</strong> {{ booking.passenger.get_full_name|default:booking.passenger.username }}</p>
+                <p><strong>Date/Time:</strong> {{ booking.ride.departure_datetime|date:"M d, Y H:i" }}</p>
+                <p><strong>Seats Requested:</strong> {{ booking.seats_booked }}</p>
+            </div>
+            
+            <p class="confirmation-text">
+                {% if action == 'accept' %}
+                    Are you sure you want to <strong>ACCEPT</strong> this booking request?
+                    {% if will_fill_seats %}
+                        <br><span class="warning">⚠️ Note: This will fill all available seats.</span>
+                    {% endif %}
+                {% else %}
+                    Are you sure you want to <strong>REJECT</strong> this booking request?
+                {% endif %}
+            </p>
+            
+            <form method="POST" class="confirmation-actions">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-{% if action == 'accept' %}success{% else %}danger{% endif %} btn-lg">
+                    Yes, {% if action == 'accept' %}Accept{% else %}Reject{% endif %}
+                </button>
+                <a href="{% url 'ride_detail' booking.ride.id %}" class="btn btn-secondary btn-lg">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
